@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_BASE_URL = 'https://mern-todo-app-zg6z.onrender.com'; // ✅ Render backend URL
-
 function App() {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
@@ -12,56 +10,43 @@ function App() {
   }, []);
 
   const fetchTodos = async () => {
-    try {
-      const res = await axios.get(`${API_BASE_URL}/todos`);
-      setTodos(res.data);
-    } catch (error) {
-      console.error("Error fetching todos:", error);
-    }
+    const res = await axios.get('https://mern-todo-app-zg6z.onrender.com/todos');
+    setTodos(res.data);
   };
 
   const addTodo = async () => {
     if (!newTodo.trim()) return;
-    try {
-      await axios.post(`${API_BASE_URL}/todos`, { text: newTodo });
-      setNewTodo('');
-      fetchTodos();
-    } catch (error) {
-      console.error("Error adding todo:", error);
-    }
+    await axios.post('https://mern-todo-app-zg6z.onrender.com/todos', { text: newTodo });
+    setNewTodo('');
+    fetchTodos();
   };
 
   const toggleComplete = async (id, completed) => {
-    try {
-      await axios.put(`${API_BASE_URL}/todos/${id}`, { completed: !completed });
-      fetchTodos();
-    } catch (error) {
-      console.error("Error updating todo:", error);
-    }
+    await axios.put(`https://mern-todo-app-zg6z.onrender.com/todos/${id}`, { completed: !completed });
+    fetchTodos();
   };
 
   const deleteTodo = async (id) => {
-    try {
-      await axios.delete(`${API_BASE_URL}/todos/${id}`);
-      fetchTodos();
-    } catch (error) {
-      console.error("Error deleting todo:", error);
-    }
+    await axios.delete(`https://mern-todo-app-zg6z.onrender.com/todos/${id}`);
+    fetchTodos();
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: 'auto', padding: '20px' }}>
-      <h2>📝 Todo List</h2>
-      <input
-        value={newTodo}
-        onChange={(e) => setNewTodo(e.target.value)}
-        placeholder="Enter a task..."
-      />
-      <button onClick={addTodo}>Add</button>
+    <div style={styles.container}>
+      <h2 style={styles.title}>📝 Todo List</h2>
+      <div style={styles.inputContainer}>
+        <input
+          style={styles.input}
+          value={newTodo}
+          onChange={(e) => setNewTodo(e.target.value)}
+          placeholder="Enter a task..."
+        />
+        <button style={styles.addButton} onClick={addTodo}>Add</button>
+      </div>
 
-      <ul style={{ listStyle: 'none', padding: 0 }}>
+      <ul style={styles.todoList}>
         {todos.map((todo) => (
-          <li key={todo._id} style={{ display: 'flex', alignItems: 'center', marginTop: 10 }}>
+          <li key={todo._id} style={styles.todoItem}>
             <input
               type="checkbox"
               checked={todo.completed}
@@ -69,19 +54,82 @@ function App() {
             />
             <span
               style={{
-                textDecoration: todo.completed ? 'line-through' : 'none',
-                marginLeft: 10,
-                flex: 1
+                ...styles.todoText,
+                textDecoration: todo.completed ? 'line-through' : 'none'
               }}
             >
               {todo.text}
             </span>
-            <button onClick={() => deleteTodo(todo._id)}>❌</button>
+            <button style={styles.deleteButton} onClick={() => deleteTodo(todo._id)}>❌</button>
           </li>
         ))}
       </ul>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+    padding: '30px',
+    fontFamily: 'Arial, sans-serif',
+    color: '#333'
+  },
+  title: {
+    textAlign: 'center',
+    color: '#222'
+  },
+  inputContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginTop: '20px',
+    gap: '10px'
+  },
+  input: {
+    padding: '10px',
+    fontSize: '16px',
+    borderRadius: '8px',
+    border: '1px solid #ccc',
+    width: '60%'
+  },
+  addButton: {
+    padding: '10px 20px',
+    fontSize: '16px',
+    borderRadius: '8px',
+    backgroundColor: '#4caf50',
+    color: '#fff',
+    border: 'none',
+    cursor: 'pointer'
+  },
+  todoList: {
+    listStyle: 'none',
+    padding: 0,
+    maxWidth: '600px',
+    margin: '40px auto 0'
+  },
+  todoItem: {
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: '8px',
+    padding: '10px 15px',
+    marginBottom: '10px',
+    boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+  },
+  todoText: {
+    flex: 1,
+    marginLeft: '10px',
+    fontSize: '16px'
+  },
+  deleteButton: {
+    backgroundColor: '#e74c3c',
+    border: 'none',
+    color: '#fff',
+    padding: '5px 10px',
+    borderRadius: '5px',
+    cursor: 'pointer'
+  }
+};
 
 export default App;
