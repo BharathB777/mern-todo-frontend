@@ -4,14 +4,18 @@ import axios from 'axios';
 function App() {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     fetchTodos();
   }, []);
 
   const fetchTodos = async () => {
+    setLoading(true);
     const res = await axios.get('https://mern-todo-app-zg6z.onrender.com/todos');
     setTodos(res.data);
+    setLoading(false);
   };
 
   const addTodo = async () => {
@@ -32,8 +36,22 @@ function App() {
   };
 
   return (
-    <div style={styles.container}>
+    <div
+      style={{
+        ...styles.container,
+        background: darkMode
+          ? 'linear-gradient(to right, #141e30, #243b55)'
+          : 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+        color: darkMode ? '#fff' : '#333'
+      }}
+    >
       <h2 style={styles.title}>📝 Todo List</h2>
+      <div style={{ textAlign: 'center' }}>
+        <button onClick={() => setDarkMode(!darkMode)} style={styles.modeButton}>
+          {darkMode ? '🌞 Light Mode' : '🌙 Dark Mode'}
+        </button>
+      </div>
+
       <div style={styles.inputContainer}>
         <input
           style={styles.input}
@@ -44,26 +62,31 @@ function App() {
         <button style={styles.addButton} onClick={addTodo}>Add</button>
       </div>
 
-      <ul style={styles.todoList}>
-        {todos.map((todo) => (
-          <li key={todo._id} style={styles.todoItem}>
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => toggleComplete(todo._id, todo.completed)}
-            />
-            <span
-              style={{
-                ...styles.todoText,
-                textDecoration: todo.completed ? 'line-through' : 'none'
-              }}
-            >
-              {todo.text}
-            </span>
-            <button style={styles.deleteButton} onClick={() => deleteTodo(todo._id)}>❌</button>
-          </li>
-        ))}
-      </ul>
+      {loading ? (
+        <p style={{ textAlign: 'center' }}>⏳ Loading...</p>
+      ) : (
+        <ul style={styles.todoList}>
+          {todos.map((todo) => (
+            <li key={todo._id} style={styles.todoItem}>
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => toggleComplete(todo._id, todo.completed)}
+              />
+              <span
+                style={{
+                  ...styles.todoText,
+                  textDecoration: todo.completed ? 'line-through' : 'none',
+                  color: darkMode && todo.completed ? '#bbb' : undefined
+                }}
+              >
+                {todo.text}
+              </span>
+              <button style={styles.deleteButton} onClick={() => deleteTodo(todo._id)}>❌</button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -71,14 +94,12 @@ function App() {
 const styles = {
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
     padding: '30px',
     fontFamily: 'Arial, sans-serif',
-    color: '#333'
+    transition: '0.3s ease'
   },
   title: {
-    textAlign: 'center',
-    color: '#222'
+    textAlign: 'center'
   },
   inputContainer: {
     display: 'flex',
@@ -100,6 +121,15 @@ const styles = {
     backgroundColor: '#4caf50',
     color: '#fff',
     border: 'none',
+    cursor: 'pointer'
+  },
+  modeButton: {
+    marginBottom: '20px',
+    padding: '8px 16px',
+    border: 'none',
+    borderRadius: '6px',
+    backgroundColor: '#555',
+    color: '#fff',
     cursor: 'pointer'
   },
   todoList: {
